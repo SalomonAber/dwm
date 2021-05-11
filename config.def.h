@@ -1,4 +1,5 @@
 /* See LICENSE file for copyright and license details. */
+#include <X11/XF86keysym.h>
 
 /* appearance */
 static const unsigned int borderpx  = 1;        /* border pixel of windows */
@@ -14,9 +15,10 @@ static const char col_sel_fg[]       = "#ffffff";
 static const char col_sel_bg[]       = "#000000";
 static const char col_sel_bd[]       = "#999999";
 static const char *colors[][3]      = {
-	/*               fg         bg         border   */
-	[SchemeNorm] = { col_nrm_fg, col_nrm_bg, col_nrm_bd },
-	[SchemeSel]  = { col_sel_fg, col_sel_bg, col_sel_bd  },
+	/*                 fg          bg          border     */
+	[SchemeNorm]   = { col_nrm_fg, col_nrm_bg, col_nrm_bd },
+	[SchemeSel]    = { col_sel_fg, col_sel_bg, col_sel_bd },
+	[SchemeStatus] = { col_sel_fg, col_sel_bg, col_sel_bd },
 };
 
 /* tagging */
@@ -27,9 +29,10 @@ static const Rule rules[] = {
 	 *	WM_CLASS(STRING) = instance, class
 	 *	WM_NAME(STRING) = title
 	 */
-	/* class      instance    title       tags mask     isfloating   monitor */
-	{ "Gimp",     NULL,       NULL,       0,            1,           -1 },
-	{ "Firefox",  NULL,       NULL,       1 << 8,       0,           -1 },
+	/* class      instance  title                  tags mask  isfloating   monitor */
+	{ "Gimp",     NULL,     NULL,                  0,         1,           -1 },
+	{ "Firefox",  NULL,     NULL,                  1 << 8,    0,           -1 },
+	{ NULL,       NULL,     "Picture-in-Picture",  0,         1,           -1 },
 };
 
 /* layout(s) */
@@ -56,12 +59,22 @@ static const Layout layouts[] = {
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 
 /* commands */
+static const char *upvol[] =   { "amixer",     "-q",   "set", "Master", "10%+", "unmute", NULL };
+static const char *downvol[] = { "amixer",     "-q",   "set", "Master", "10%-", "unmute", NULL };
+static const char *mutevol[] = { "amixer",     "-q",   "set", "Master", "toggle", NULL };
+static const char *upbr[] =    { "xbacklight", "-inc", "10",  NULL };
+static const char *downbr[] =  { "xbacklight", "-dec", "10",  NULL };
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_nrm_bg, "-nf", col_nrm_fg, "-sb", col_sel_bg, "-sf", col_sel_fg, NULL };
 static const char *termcmd[]  = { "st", NULL };
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
+	{ 0,         XF86XK_AudioRaiseVolume,      spawn,          {.v = upvol} },
+	{ 0,         XF86XK_AudioLowerVolume,      spawn,          {.v = downvol} },
+	{ 0,         XF86XK_AudioMute,             spawn,          {.v = mutevol} },
+	{ 0,         XF86XK_MonBrightnessUp,       spawn,          {.v = upbr} },
+	{ 0,         XF86XK_MonBrightnessDown,     spawn,          {.v = downbr} },
 	{ MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
 	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
